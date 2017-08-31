@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>600</height>
+    <width>829</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,6 +29,13 @@
       </item>
      </layout>
     </item>
+    <item alignment="Qt::AlignHCenter">
+     <widget class="QCheckBox" name="checkBox">
+      <property name="text">
+       <string>Show Control Points</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -36,8 +43,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>900</width>
-     <height>20</height>
+     <width>829</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>

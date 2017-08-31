@@ -28,6 +28,9 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
+public slots:
+    void showControlPoints(int state);
+
 private:
     std::vector< QVector3D > previewPoints;
     std::vector< QVector3D > points;
@@ -40,7 +43,10 @@ private:
     QMatrix4x4 proj;
 
     bool isEditingPoint;
-    int editedPointIndex;
+    int curveBeingEdited;
+    int controlPointBeingEdited;
+
+    BezierCurve* calculateBezierControlPoints(QVector3D p0, QVector3D p1, QVector3D p2, int n);
 };
 
 #endif // RENDERAREAWIDGET_H

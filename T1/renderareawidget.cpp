@@ -37,6 +37,11 @@ RenderAreaWidget::RenderAreaWidget(QWidget* parent)
     isEditingPoint = false;
 }
 
+void RenderAreaWidget::showControlPoints(int state)
+{
+
+}
+
 
 RenderAreaWidget::~RenderAreaWidget()
 {
@@ -118,17 +123,24 @@ void RenderAreaWidget::paintGL()
             program->setUniformValue("color", QVector3D(1,1,0)); //Amarelo
             glDrawArrays(GL_POINTS, 0, (int)points.size());
 
-            //Desenha Bezier e pontos de controle
+            //Desenha Bezier
             program->setUniformValue("color", QVector3D(1,1,1)); //Branco
             std::vector<QVector3D> currentCurvePoints;
             for (int i = 0; i < curves.size(); i++)
             {
-//                currentCurvePoints = curves[i].getControlPoints();
-//                pointsBuffer.allocate( &currentCurvePoints[0], (int)currentCurvePoints.size()*sizeof(QVector3D) );
-//                glDrawArrays(GL_POINTS, 0, (int)currentCurvePoints.size());
                 currentCurvePoints = curves[i].getCurvePoints();
                 pointsBuffer.allocate( &currentCurvePoints[0], (int)currentCurvePoints.size()*sizeof(QVector3D) );
                 glDrawArrays(GL_LINE_STRIP, 0, (int)currentCurvePoints.size());
+            }
+
+            //Desenha pontos de controle das Beziers
+            program->setUniformValue("color", QVector3D(0,0,1)); //Azul
+            std::vector<QVector3D> currentControlPoints;
+            for (int i = 0; i < curves.size(); i++)
+            {
+                currentControlPoints = curves[i].getControlPoints();
+                pointsBuffer.allocate( &currentControlPoints[1], (int)2*sizeof(QVector3D) );
+                glDrawArrays(GL_POINTS, 0, 2);
             }
 
         }
@@ -136,7 +148,7 @@ void RenderAreaWidget::paintGL()
         if(isEditingPoint)
         {
             //Highlight ponto editado
-            pointsBuffer.allocate( &points[editedPointIndex], (int)sizeof(QVector3D) );
+            pointsBuffer.allocate( &curves[curveBeingEdited].getControlPoints()[controlPointBeingEdited], (int)sizeof(QVector3D) );
             program->setUniformValue("color", QVector3D(0,0,1)); //Azul
             glDrawArrays(GL_POINTS, 0, 1);
         }
@@ -152,15 +164,21 @@ void RenderAreaWidget::resizeGL(int width, int height)
 
 void RenderAreaWidget::mousePressEvent(QMouseEvent *event)
 {
+    std::vector<QVector3D> controlPoints;
     QVector3D point( event->x(), height()-event->y(), 0 );
     point = point.unproject( view, proj, QRect(0,0,width(),height()));
-    for (int i = 0; i < points.size(); i++)
+    for (int i = 0; i < curves.size(); i++)
     {
-        if(point.distanceToPoint(points[i]) < 1.05)
+        controlPoints = curves[i].getControlPoints();
+        for (int j = 0; j < 4; j++)
         {
-            isEditingPoint = true;
-            editedPointIndex = i;
-            return;
+            if(point.distanceToPoint(controlPoints[j]) < 1.05)
+            {
+                isEditingPoint = true;
+                curveBeingEdited = i;
+                controlPointBeingEdited = j;
+                return;
+            }
         }
     }
 }
@@ -177,16 +195,15 @@ void RenderAreaWidget::mouseMoveEvent(QMouseEvent *event)
     }
     if (isEditingPoint)
     {
-        if (editedPointIndex == points.size() - 1)
+        if (curveBeingEdited == curves.size() - 1 &&
+            controlPointBeingEdited == 3)
         {
             previewPoints.front().setX(point.x());
             previewPoints.front().setY(point.y());
         }
-        points[editedPointIndex].setX(point.x());
-        points[editedPointIndex].setY(point.y());
         if (!curves.empty())
         {
-            curves.front().setControlPoint(editedPointIndex, points[editedPointIndex]);
+            curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
         }
     }
     previewPoints.back().setX(point.x());
@@ -208,26 +225,16 @@ void RenderAreaWidget::mouseReleaseEvent(QMouseEvent *event)
         previewPoints.front().setX(point.x());
         previewPoints.front().setY(point.y());
 
-        if (points.size() == 4)
+        int size = points.size();
+        if (size > 2)
         {
-            BezierCurve newCurve(points[0], points[1], points[2], points[3]);
+            curves.push_back(*calculateBezierControlPoints(points.rbegin()[2], points.rbegin()[1], points.rbegin()[0], size));
+        }
+        else if (size == 2)
+        {
+            BezierCurve newCurve(points[0], (1.0/3.0)*(points[1]-points[0]) + points[0], (2.0/3.0)*(points[1]-points[0]) + points[0], points[1]);
             curves.push_back(newCurve);
         }
-
-//        if (points.size() > 3)
-//        {
-
-//        }
-//        else if (points.size() == 2)
-//        {
-//            BezierCurve newCurve(points[0], (1.0/3.0)*(points[1]-points[0]) + points[0], (2.0/3.0)*(points[1]-points[0]) + points[0], points[1]);
-//            curves.push_back(newCurve);
-//        }
-//        else if (points.size() == 3)
-//        {
-//            BezierCurve newCurve(points[0], (1.0/3.0)*(points[1]-points[0]) + points[0], (2.0/3.0)*(points[1]-points[0]) + points[0], points[1]);
-//            curves.push_back(newCurve);
-//        }
     }
     else
     {
@@ -236,5 +243,73 @@ void RenderAreaWidget::mouseReleaseEvent(QMouseEvent *event)
 
 
     update();
+}
+
+
+BezierCurve* RenderAreaWidget::calculateBezierControlPoints(QVector3D p0, QVector3D p1, QVector3D p2, int size)
+{
+    int n;
+    float f;
+    float l0 = p1.distanceToPoint(p0);
+    float l1 = p2.distanceToPoint(p1);
+    float pho = l0/(l0+l1);
+    float A[4][4];
+    QVector3D controlPoints[4];
+    std::vector<QVector3D> b;
+    QVector3D b0(0,0,0);
+
+    if (size != 3)
+    {
+        n = 3;
+        A[0][0] = (1-pho); A[0][1] = pho; A[0][2] =  0;
+        A[1][0] =      -2; A[1][1] =   2; A[1][2] = -1;
+        A[2][0] =       0; A[2][1] =  -1; A[2][2] =  2;
+
+        b.push_back(p1);
+        b.push_back(-1*curves.back().getControlPoints()[2]);
+        b.push_back(p2);
+    }
+    else
+    {
+        n = 4;
+        A[0][0] = 2; A[0][1] =      -1; A[0][2] =   0; A[0][3] =  0;
+        A[1][0] = 0; A[1][1] = (1-pho); A[1][2] = pho; A[1][3] =  0;
+        A[2][0] = 1; A[2][1] =      -2; A[2][2] =   2; A[2][3] = -1;
+        A[3][0] = 0; A[3][1] =       0; A[3][2] =  -1; A[3][3] =  2;
+
+        b.push_back(p0);
+        b.push_back(p1);
+        b.push_back(b0);
+        b.push_back(p2);
+    }
+
+    for ( int j = 0; j < n-1; j++) {
+        for ( int i = j+1; i < n ; i ++) {
+            f = A[i][j]/A[j][j];
+
+            for (int k = j; k < n; k++) {
+                A[i][k] = A[i][k] - A[j][k]*f;
+            }
+            b[i] = b[i] - b[j]*f;
+        }
+    }
+
+    for (int i = n-1; i >= 0; i--) {
+        QVector3D s(0,0,0);
+        for (int j = n-1; j > i; j--) {
+            s = s + A[i][j]*controlPoints[j];
+        }
+        controlPoints[i] = (b[i] - s)/A[i][i];
+    }
+
+    if (size == 3)
+    {
+        curves.back().setControlPoint(1, controlPoints[0]);
+        curves.back().setControlPoint(2, controlPoints[1]);
+        return new BezierCurve(p1, controlPoints[2], controlPoints[3], p2);
+    }
+    curves.back().setControlPoint(2, controlPoints[0]);
+    return new BezierCurve(p1, controlPoints[1], controlPoints[2], p2);
+
 }
 
