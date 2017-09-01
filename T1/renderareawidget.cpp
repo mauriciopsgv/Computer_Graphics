@@ -35,11 +35,13 @@ RenderAreaWidget::RenderAreaWidget(QWidget* parent)
     this->setMouseTracking(true);
     previewPoints.resize(2);
     isEditingPoint = false;
+    isShowingControlPoints = false;
 }
 
 void RenderAreaWidget::showControlPoints(int state)
 {
-
+    isShowingControlPoints = !isShowingControlPoints;
+    update();
 }
 
 
@@ -134,15 +136,17 @@ void RenderAreaWidget::paintGL()
             }
 
             //Desenha pontos de controle das Beziers
-            program->setUniformValue("color", QVector3D(0,0,1)); //Azul
-            std::vector<QVector3D> currentControlPoints;
-            for (int i = 0; i < curves.size(); i++)
+            if (isShowingControlPoints)
             {
-                currentControlPoints = curves[i].getControlPoints();
-                pointsBuffer.allocate( &currentControlPoints[1], (int)2*sizeof(QVector3D) );
-                glDrawArrays(GL_POINTS, 0, 2);
+                program->setUniformValue("color", QVector3D(0,0,1)); //Azul
+                std::vector<QVector3D> currentControlPoints;
+                for (int i = 0; i < curves.size(); i++)
+                {
+                    currentControlPoints = curves[i].getControlPoints();
+                    pointsBuffer.allocate( &currentControlPoints[1], (int)2*sizeof(QVector3D) );
+                    glDrawArrays(GL_POINTS, 0, 2);
+                }
             }
-
         }
 
         if(isEditingPoint)

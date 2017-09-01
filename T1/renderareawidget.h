@@ -42,6 +42,7 @@ private:
     QMatrix4x4 view;
     QMatrix4x4 proj;
 
+    bool isShowingControlPoints;
     bool isEditingPoint;
     int curveBeingEdited;
     int controlPointBeingEdited;
