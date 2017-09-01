@@ -35,11 +35,13 @@ RenderAreaWidget::RenderAreaWidget(QWidget* parent)
     this->setMouseTracking(true);
     previewPoints.resize(2);
     isEditingPoint = false;
+    isShowingControlPoints = false;
 }
 
 void RenderAreaWidget::showControlPoints(int state)
 {
-
+    isShowingControlPoints = !isShowingControlPoints;
+    update();
 }
 
 
@@ -134,22 +136,24 @@ void RenderAreaWidget::paintGL()
             }
 
             //Desenha pontos de controle das Beziers
-            program->setUniformValue("color", QVector3D(0,0,1)); //Azul
-            std::vector<QVector3D> currentControlPoints;
-            for (int i = 0; i < curves.size(); i++)
+            if (isShowingControlPoints)
             {
-                currentControlPoints = curves[i].getControlPoints();
-                pointsBuffer.allocate( &currentControlPoints[1], (int)2*sizeof(QVector3D) );
-                glDrawArrays(GL_POINTS, 0, 2);
+                program->setUniformValue("color", QVector3D(0,0,1)); //Azul
+                std::vector<QVector3D> currentControlPoints;
+                for (int i = 0; i < curves.size(); i++)
+                {
+                    currentControlPoints = curves[i].getControlPoints();
+                    pointsBuffer.allocate( &currentControlPoints[1], (int)2*sizeof(QVector3D) );
+                    glDrawArrays(GL_POINTS, 0, 2);
+                }
             }
-
         }
 
         if(isEditingPoint)
         {
             //Highlight ponto editado
             pointsBuffer.allocate( &curves[curveBeingEdited].getControlPoints()[controlPointBeingEdited], (int)sizeof(QVector3D) );
-            program->setUniformValue("color", QVector3D(0,0,1)); //Azul
+            program->setUniformValue("color", QVector3D(1,0,1)); //Roxo
             glDrawArrays(GL_POINTS, 0, 1);
         }
     }
@@ -188,6 +192,8 @@ void RenderAreaWidget::mouseMoveEvent(QMouseEvent *event)
 {
     QVector3D point( event->x(), height()-event->y(), 0 );
     point = point.unproject( view, proj, QRect(0,0,width(),height()));
+    point.setZ(0.f);
+
     if (points.empty())
     {
         previewPoints.front().setX(point.x());
@@ -195,6 +201,7 @@ void RenderAreaWidget::mouseMoveEvent(QMouseEvent *event)
     }
     if (isEditingPoint)
     {
+        // if the last point inputted is being edited we need to edit the preview point as well
         if (curveBeingEdited == curves.size() - 1 &&
             controlPointBeingEdited == 3)
         {
@@ -203,7 +210,12 @@ void RenderAreaWidget::mouseMoveEvent(QMouseEvent *event)
         }
         if (!curves.empty())
         {
-            curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
+            if (controlPointBeingEdited == 0 || controlPointBeingEdited == 3)
+            {
+                points[curveBeingEdited + controlPointBeingEdited/3].setX(point.x());
+                points[curveBeingEdited + controlPointBeingEdited/3].setY(point.y());
+            }
+            editBezier(point);
         }
     }
     previewPoints.back().setX(point.x());
@@ -244,6 +256,52 @@ void RenderAreaWidget::mouseReleaseEvent(QMouseEvent *event)
 
     update();
 }
+
+void RenderAreaWidget::editBezier(QVector3D point)
+{
+
+    if (curveBeingEdited == 0 &&
+        (controlPointBeingEdited == 0 || controlPointBeingEdited == 1) ||
+        curveBeingEdited == curves.size() - 1 &&
+        (controlPointBeingEdited == 2 || controlPointBeingEdited == 3))
+    {
+        curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
+        return;
+    }
+
+    QVector3D move = point - curves[curveBeingEdited].getControlPoints()[controlPointBeingEdited];
+    if (controlPointBeingEdited != 3)
+    {
+        // moving Rn
+        if (controlPointBeingEdited == 1)
+        {
+            QVector3D ln = curves[curveBeingEdited-1].getControlPoints()[2];
+            curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
+            curves[curveBeingEdited-1].setControlPoint(2, ln - move );
+        }
+        // moving Ln
+        else
+        {
+            QVector3D rn = curves[curveBeingEdited+1].getControlPoints()[1];
+            curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
+            curves[curveBeingEdited+1].setControlPoint(1, rn - move );
+        }
+    }
+    // moving Pn
+    else
+    {
+        QVector3D ln = curves[curveBeingEdited].getControlPoints()[2];
+        QVector3D rn = curves[curveBeingEdited+1].getControlPoints()[1];
+        // if changing the point between two beziers you have to update on both sides
+        curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
+        curves[curveBeingEdited+1].setControlPoint(0, point);
+
+        curves[curveBeingEdited].setControlPoint(2, ln + move );
+        curves[curveBeingEdited+1].setControlPoint(1, rn + move );
+    }
+
+}
+
 
 
 BezierCurve* RenderAreaWidget::calculateBezierControlPoints(QVector3D p0, QVector3D p1, QVector3D p2, int size)

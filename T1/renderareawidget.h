@@ -42,9 +42,12 @@ private:
     QMatrix4x4 view;
     QMatrix4x4 proj;
 
+    bool isShowingControlPoints;
     bool isEditingPoint;
     int curveBeingEdited;
     int controlPointBeingEdited;
+
+    void editBezier(QVector3D point);
 
     BezierCurve* calculateBezierControlPoints(QVector3D p0, QVector3D p1, QVector3D p2, int n);
 };
