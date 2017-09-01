@@ -269,76 +269,35 @@ void RenderAreaWidget::editBezier(QVector3D point)
         return;
     }
 
+    QVector3D move = point - curves[curveBeingEdited].getControlPoints()[controlPointBeingEdited];
     if (controlPointBeingEdited != 3)
     {
-        float l0,l1, pho;
-        QVector3D ln, rn;
         // moving Rn
         if (controlPointBeingEdited == 1)
         {
-            l0 = point.distanceToPoint(points[curveBeingEdited-1]);
-            l1 = point.distanceToPoint(points[curveBeingEdited+1]);
-
-            pho = l0/(l0+l1);
-
-            rn = point;
-            ln = (points[curveBeingEdited] - pho*rn)/(1-pho);
-            curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, rn);
-            curves[curveBeingEdited-1].setControlPoint(2, ln);
+            QVector3D ln = curves[curveBeingEdited-1].getControlPoints()[2];
+            curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
+            curves[curveBeingEdited-1].setControlPoint(2, ln - move );
         }
         // moving Ln
         else
         {
-            l0 = point.distanceToPoint(points[curveBeingEdited]);
-            l1 = point.distanceToPoint(points[curveBeingEdited +2]);
-            pho = l0/(l0+l1);
-
-            ln = point;
-            rn = (points[curveBeingEdited+1] - (1-pho)*ln)/pho;
-            curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, ln);
-            curves[curveBeingEdited+1].setControlPoint(1, rn);
+            QVector3D rn = curves[curveBeingEdited+1].getControlPoints()[1];
+            curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
+            curves[curveBeingEdited+1].setControlPoint(1, rn - move );
         }
     }
     // moving Pn
     else
     {
+        QVector3D ln = curves[curveBeingEdited].getControlPoints()[2];
+        QVector3D rn = curves[curveBeingEdited+1].getControlPoints()[1];
         // if changing the point between two beziers you have to update on both sides
-        curves[curveBeingEdited+1].setControlPoint(0, point);
-        int n = 2;
-        float f;
-        float l0 = point.distanceToPoint(points[curveBeingEdited]);
-        float l1 = point.distanceToPoint(points[curveBeingEdited +2]);
-        float pho = l0/(l0+l1);
-        float A[2][2];
-        A[0][0] = (1-pho); A[0][1] = pho;
-        A[1][0] =      -2; A[1][1] =   2;
-        std::vector<QVector3D> b;
-        b.push_back(point);
-        b.push_back(curves[curveBeingEdited+1].getControlPoints()[2] - curves[curveBeingEdited].getControlPoints()[1]);
-        QVector3D controlPoints[2];
-
-        for ( int j = 0; j < n-1; j++) {
-            for ( int i = j+1; i < n ; i ++) {
-                f = A[i][j]/A[j][j];
-
-                for (int k = j; k < n; k++) {
-                    A[i][k] = A[i][k] - A[j][k]*f;
-                }
-                b[i] = b[i] - b[j]*f;
-            }
-        }
-
-        for (int i = n-1; i >= 0; i--) {
-            QVector3D s(0,0,0);
-            for (int j = n-1; j > i; j--) {
-                s = s + A[i][j]*controlPoints[j];
-            }
-            controlPoints[i] = (b[i] - s)/A[i][i];
-        }
-
         curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
-        curves[curveBeingEdited].setControlPoint(controlPointBeingEdited - 1, controlPoints[0]);
-        curves[curveBeingEdited+1].setControlPoint(1, controlPoints[1]);
+        curves[curveBeingEdited+1].setControlPoint(0, point);
+
+        curves[curveBeingEdited].setControlPoint(2, ln + move );
+        curves[curveBeingEdited+1].setControlPoint(1, rn + move );
     }
 
 }
