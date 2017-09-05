@@ -11,6 +11,7 @@ public:
     std::vector<QVector3D> getCurvePoints();
 
     std::vector<QVector3D> getControlPoints();
+
     void setControlPoint(int num, QVector3D point);
 
 private:
@@ -22,6 +23,7 @@ private:
     std::vector<QVector3D> curvePoints;
 
     QVector3D* calculatePoint(float t);
+
     void UpdateCurvePoints();
 };
 
