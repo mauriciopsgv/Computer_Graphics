@@ -188,23 +188,27 @@ void RenderAreaWidget::resizeGL(int width, int height)
 
 void RenderAreaWidget::mousePressEvent(QMouseEvent *event)
 {
-    std::vector<QVector3D> controlPoints;
-    QVector3D point( event->x(), height()-event->y(), 0 );
-    point = point.unproject( view, proj, QRect(0,0,width(),height()));
-
-    // curves - 1 because the last curve os this vector is the preview curve
-    int size = curves.size();
-    for (int i = 0; i < size - 1; i++)
+    if (isShowingControlPoints)
     {
-        controlPoints = curves[i].getControlPoints();
-        for (int j = 0; j < 4; j++)
+        std::vector<QVector3D> controlPoints;
+        QVector3D point( event->x(), height()-event->y(), 0 );
+        point = point.unproject( view, proj, QRect(0,0,width(),height()));
+        point.setZ(0.f);
+
+        // curves - 1 because the last curve os this vector is the preview curve
+        int size = curves.size();
+        for (int i = 0; i < size - 1; i++)
         {
-            if(point.distanceToPoint(controlPoints[j]) < 1.05)
+            controlPoints = curves[i].getControlPoints();
+            for (int j = 0; j < 4; j++)
             {
-                isEditingPoint = true;
-                curveBeingEdited = i;
-                controlPointBeingEdited = j;
-                return;
+                if(point.distanceToPoint(controlPoints[j]) < 0.1)
+                {
+                    isEditingPoint = true;
+                    curveBeingEdited = i;
+                    controlPointBeingEdited = j;
+                    return;
+                }
             }
         }
     }
