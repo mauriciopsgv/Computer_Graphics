@@ -33,6 +33,8 @@ public slots:
 
 private:
     std::vector< QVector3D > previewPoints;
+    BezierCurve previewBezier;
+
     std::vector< QVector3D > points;
     std::vector< BezierCurve > curves;
 
@@ -44,7 +46,7 @@ private:
 
     bool isShowingControlPoints;
     bool isEditingPoint;
-    int curveBeingEdited;
+    unsigned int curveBeingEdited;
     int controlPointBeingEdited;
 
     void editBezier(QVector3D point);

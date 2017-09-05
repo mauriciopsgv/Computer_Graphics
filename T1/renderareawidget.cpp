@@ -128,7 +128,7 @@ void RenderAreaWidget::paintGL()
             //Desenha Bezier
             program->setUniformValue("color", QVector3D(1,1,1)); //Branco
             std::vector<QVector3D> currentCurvePoints;
-            for (int i = 0; i < curves.size(); i++)
+            for (unsigned int i = 0; i < curves.size(); i++)
             {
                 currentCurvePoints = curves[i].getCurvePoints();
                 pointsBuffer.allocate( &currentCurvePoints[0], (int)currentCurvePoints.size()*sizeof(QVector3D) );
@@ -140,7 +140,7 @@ void RenderAreaWidget::paintGL()
             {
                 program->setUniformValue("color", QVector3D(0,0,1)); //Azul
                 std::vector<QVector3D> currentControlPoints;
-                for (int i = 0; i < curves.size(); i++)
+                for (unsigned int i = 0; i < curves.size(); i++)
                 {
                     currentControlPoints = curves[i].getControlPoints();
                     pointsBuffer.allocate( &currentControlPoints[1], (int)2*sizeof(QVector3D) );
@@ -171,7 +171,7 @@ void RenderAreaWidget::mousePressEvent(QMouseEvent *event)
     std::vector<QVector3D> controlPoints;
     QVector3D point( event->x(), height()-event->y(), 0 );
     point = point.unproject( view, proj, QRect(0,0,width(),height()));
-    for (int i = 0; i < curves.size(); i++)
+    for (unsigned int i = 0; i < curves.size(); i++)
     {
         controlPoints = curves[i].getControlPoints();
         for (int j = 0; j < 4; j++)
@@ -260,10 +260,10 @@ void RenderAreaWidget::mouseReleaseEvent(QMouseEvent *event)
 void RenderAreaWidget::editBezier(QVector3D point)
 {
 
-    if (curveBeingEdited == 0 &&
-        (controlPointBeingEdited == 0 || controlPointBeingEdited == 1) ||
-        curveBeingEdited == curves.size() - 1 &&
-        (controlPointBeingEdited == 2 || controlPointBeingEdited == 3))
+    if ( (curveBeingEdited == 0 &&
+          (controlPointBeingEdited == 0 || controlPointBeingEdited == 1)) ||
+         (curveBeingEdited == curves.size() - 1 &&
+          (controlPointBeingEdited == 2 || controlPointBeingEdited == 3)))
     {
         curves[curveBeingEdited].setControlPoint(controlPointBeingEdited, point);
         return;
