@@ -50,6 +50,8 @@ private:
 
     void editBezier(QVector3D point);
 
+    void updatePreviewBezier(QVector3D point);
+
     QVector3D * calculateBezierControlPoints(QVector3D p0, QVector3D p1, QVector3D p2, int n, QVector3D * rn1 = nullptr);
 };
 

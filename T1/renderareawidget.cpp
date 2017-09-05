@@ -242,32 +242,7 @@ void RenderAreaWidget::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
-    QVector3D * newControlPoints;
-    int size = points.size();
-    if (size > 2)
-    {
-        newControlPoints = calculateBezierControlPoints(points.rbegin()[1], points.rbegin()[0], point, size + 1, &curves.rbegin()[1].getControlPoints()[1]);
-        curves.rbegin()[1].setControlPoint(2, newControlPoints[0]);
-        curves.back().setControlPoint(1, newControlPoints[1]);
-        curves.back().setControlPoint(2, newControlPoints[2]);
-        curves.back().setControlPoint(3, point);
-    }
-    else if (size == 2)
-    {
-        newControlPoints = calculateBezierControlPoints(points.rbegin()[1], points.rbegin()[0], point, size + 1);
-        curves.rbegin()[1].setControlPoint(1, newControlPoints[0]);
-        curves.rbegin()[1].setControlPoint(2, newControlPoints[1]);
-        curves.back().setControlPoint(1, newControlPoints[2]);
-        curves.back().setControlPoint(2, newControlPoints[3]);
-        curves.back().setControlPoint(3, point);
-    }
-    else if (size == 1)
-    {
-        curves.front().setControlPoint(1, (1.0/3.0)*(point-points.front()) + points.front());
-        curves.front().setControlPoint(2, (2.0/3.0)*(point-points.front()) + points.front());
-        curves.front().setControlPoint(3, point);
-    }
-    delete []newControlPoints;
+    updatePreviewBezier(point);
 
     previewPoints.back().setX(point.x());
     previewPoints.back().setY(point.y());
@@ -278,45 +253,53 @@ void RenderAreaWidget::mouseMoveEvent(QMouseEvent *event)
 
 void RenderAreaWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (!isEditingPoint)
+    QVector3D point( event->x(), height()-event->y(), 0 );
+    point = point.unproject( view, proj, QRect(0,0,width(),height()));
+    point.setZ(0.f);
+    if (event->button() == Qt::LeftButton)
     {
-        QVector3D point( event->x(), height()-event->y(), 0 );
-        point = point.unproject( view, proj, QRect(0,0,width(),height()));
-        point.setZ(0.f);
-
-        points.push_back( point );
-        previewPoints.front().setX(point.x());
-        previewPoints.front().setY(point.y());
-
-        QVector3D * newControlPoints;
-        int size = points.size();
-
-        if (size > 2)
+        if (!isEditingPoint)
         {
-            newControlPoints = calculateBezierControlPoints(points.rbegin()[1], points.rbegin()[0], point, size + 1, &curves.back().getControlPoints()[1]);
-            curves.back().setControlPoint(2, newControlPoints[0]);
-            curves.push_back(*new BezierCurve(points.back(), newControlPoints[1], newControlPoints[2], point));
-        }
-        else if (size == 2)
-        {
-            newControlPoints = calculateBezierControlPoints(points.rbegin()[1], points.rbegin()[0], point, size + 1);
-            curves.back().setControlPoint(1, newControlPoints[0]);
-            curves.back().setControlPoint(2, newControlPoints[1]);
-            curves.push_back(*new BezierCurve(points.back(), newControlPoints[2], newControlPoints[3], point));
-        }
-        else if (size == 1)
-        {
-            BezierCurve newCurve(points.front(), (1.0/3.0)*(point-points.front()) + points.front(), (2.0/3.0)*(point-points.front()) + points.front(), point);
-            curves.push_back(newCurve);
-        }
-        delete []newControlPoints;
+            points.push_back( point );
+            previewPoints.front().setX(point.x());
+            previewPoints.front().setY(point.y());
 
+            QVector3D * newControlPoints;
+            int size = points.size();
+
+            if (size > 2)
+            {
+                newControlPoints = calculateBezierControlPoints(points.rbegin()[1], points.rbegin()[0], point, size + 1, &curves.back().getControlPoints()[1]);
+                curves.back().setControlPoint(2, newControlPoints[0]);
+                curves.push_back(*new BezierCurve(points.back(), newControlPoints[1], newControlPoints[2], point));
+            }
+            else if (size == 2)
+            {
+                newControlPoints = calculateBezierControlPoints(points.rbegin()[1], points.rbegin()[0], point, size + 1);
+                curves.back().setControlPoint(1, newControlPoints[0]);
+                curves.back().setControlPoint(2, newControlPoints[1]);
+                curves.push_back(*new BezierCurve(points.back(), newControlPoints[2], newControlPoints[3], point));
+            }
+            else if (size == 1)
+            {
+                BezierCurve newCurve(points.front(), (1.0/3.0)*(point-points.front()) + points.front(), (2.0/3.0)*(point-points.front()) + points.front(), point);
+                curves.push_back(newCurve);
+            }
+            delete []newControlPoints;
+
+        }
+        else
+        {
+            isEditingPoint = false;
+        }
     }
-    else
+    else if (event->button() == Qt::RightButton)
     {
-        isEditingPoint = false;
+        curves.pop_back();
+        points.pop_back();
+        previewPoints.front() = points.back();
+        updatePreviewBezier(point);
     }
-
 
     update();
 }
@@ -366,7 +349,41 @@ void RenderAreaWidget::editBezier(QVector3D point)
 
 }
 
-
+void RenderAreaWidget::updatePreviewBezier(QVector3D point)
+{
+    QVector3D * newControlPoints;
+    int size = points.size();
+    if (size > 2)
+    {
+        newControlPoints = calculateBezierControlPoints(points.rbegin()[1], points.rbegin()[0], point, size + 1, &curves.rbegin()[1].getControlPoints()[1]);
+        curves.rbegin()[1].setControlPoint(2, newControlPoints[0]);
+        curves.back().setControlPoint(1, newControlPoints[1]);
+        curves.back().setControlPoint(2, newControlPoints[2]);
+        curves.back().setControlPoint(3, point);
+        delete &newControlPoints[0];
+        delete &newControlPoints[1];
+        delete &newControlPoints[2];
+    }
+    else if (size == 2)
+    {
+        newControlPoints = calculateBezierControlPoints(points.rbegin()[1], points.rbegin()[0], point, size + 1);
+        curves.rbegin()[1].setControlPoint(1, newControlPoints[0]);
+        curves.rbegin()[1].setControlPoint(2, newControlPoints[1]);
+        curves.back().setControlPoint(1, newControlPoints[2]);
+        curves.back().setControlPoint(2, newControlPoints[3]);
+        curves.back().setControlPoint(3, point);
+        delete &newControlPoints[0];
+        delete &newControlPoints[1];
+        delete &newControlPoints[2];
+        delete &newControlPoints[3];
+    }
+    else if (size == 1)
+    {
+        curves.front().setControlPoint(1, (1.0/3.0)*(point-points.front()) + points.front());
+        curves.front().setControlPoint(2, (2.0/3.0)*(point-points.front()) + points.front());
+        curves.front().setControlPoint(3, point);
+    }
+}
 
 QVector3D * RenderAreaWidget::calculateBezierControlPoints(QVector3D p0, QVector3D p1, QVector3D p2, int size, QVector3D * rn1)
 {
