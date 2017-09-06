@@ -43,6 +43,7 @@ private:
     QMatrix4x4 view;
     QMatrix4x4 proj;
 
+    bool isShowingPreview;
     bool isShowingControlPoints;
     bool isEditingPoint;
     unsigned int curveBeingEdited;

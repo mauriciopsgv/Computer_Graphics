@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>829</width>
-    <height>596</height>
+    <width>1068</width>
+    <height>678</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,10 +43,16 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>829</width>
+     <width>1068</width>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuCG_T1">
+    <property name="title">
+     <string>CG-T1</string>
+    </property>
+   </widget>
+   <addaction name="menuCG_T1"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>

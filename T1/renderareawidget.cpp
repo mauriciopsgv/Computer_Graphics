@@ -36,6 +36,7 @@ RenderAreaWidget::RenderAreaWidget(QWidget* parent)
     previewPoints.resize(2);
     isEditingPoint = false;
     isShowingControlPoints = false;
+    isShowingPreview = true;
 }
 
 void RenderAreaWidget::showControlPoints(int state)
@@ -101,7 +102,7 @@ void RenderAreaWidget::paintGL()
         program->enableAttributeArray(0);
         program->setAttributeBuffer(0,GL_FLOAT,0,3,sizeof(QVector3D));
 
-        if(!previewPoints.empty() && !isEditingPoint)
+        if(isShowingPreview && !previewPoints.empty() && !isEditingPoint)
         {
             pointsBuffer.allocate( &previewPoints[0], (int)previewPoints.size()*sizeof(QVector3D) );
 
@@ -246,10 +247,13 @@ void RenderAreaWidget::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
-    updatePreviewBezier(point);
+    if (isShowingPreview)
+    {
+        updatePreviewBezier(point);
 
-    previewPoints.back().setX(point.x());
-    previewPoints.back().setY(point.y());
+        previewPoints.back().setX(point.x());
+        previewPoints.back().setY(point.y());
+    }
 
     update();
 }
@@ -262,7 +266,7 @@ void RenderAreaWidget::mouseReleaseEvent(QMouseEvent *event)
     point.setZ(0.f);
     if (event->button() == Qt::LeftButton)
     {
-        if (!isEditingPoint)
+        if (!isEditingPoint && isShowingPreview)
         {
             points.push_back( point );
             previewPoints.front().setX(point.x());
@@ -302,7 +306,18 @@ void RenderAreaWidget::mouseReleaseEvent(QMouseEvent *event)
         curves.pop_back();
         points.pop_back();
         previewPoints.front() = points.back();
-        updatePreviewBezier(point);
+        if (isShowingPreview)
+            updatePreviewBezier(point);
+    }
+    else if (event->button() == Qt::MiddleButton)
+    {
+        if (!isShowingPreview)
+        {
+            previewPoints.back().setX(point.x());
+            previewPoints.back().setY(point.y());
+            updatePreviewBezier(point);
+        }
+        isShowingPreview = !isShowingPreview;
     }
 
     update();
