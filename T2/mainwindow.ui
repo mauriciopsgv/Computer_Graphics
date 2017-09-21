@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1058</width>
+    <height>605</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CG - T2 - Modelo</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="inputLabel">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>512</width>
+          <height>512</height>
+         </size>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(0, 0, 0);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="outputLabel">
+        <property name="minimumSize">
+         <size>
+          <width>512</width>
+          <height>512</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(0, 0, 0);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1058</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionCarregar_imagem"/>
+   <addaction name="actionSalvar_imagem"/>
+   <addaction name="actionCarregar_resultado"/>
+   <addaction name="separator"/>
+   <addaction name="actionSmoothing"/>
+   <addaction name="actionArestas"/>
+   <addaction name="actionHaar"/>
+   <addaction name="actionHaar_inverso"/>
+   <addaction name="actionRealce_em_Haar"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionCarregar_imagem">
+   <property name="text">
+    <string>Carregar imagem</string>
+   </property>
+  </action>
+  <action name="actionSalvar_imagem">
+   <property name="text">
+    <string>Salvar imagem</string>
+   </property>
+  </action>
+  <action name="actionSmoothing">
+   <property name="text">
+    <string>Smoothing</string>
+   </property>
+  </action>
+  <action name="actionArestas">
+   <property name="text">
+    <string>Arestas</string>
+   </property>
+  </action>
+  <action name="actionHaar">
+   <property name="text">
+    <string>Haar</string>
+   </property>
+   <property name="toolTip">
+    <string>Haar</string>
+   </property>
+  </action>
+  <action name="actionHaar_inverso">
+   <property name="text">
+    <string>Haar inverso</string>
+   </property>
+  </action>
+  <action name="actionCarregar_resultado">
+   <property name="text">
+    <string>Carregar resultado</string>
+   </property>
+   <property name="toolTip">
+    <string>Carregar resultado</string>
+   </property>
+  </action>
+  <action name="actionRealce_em_Haar">
+   <property name="text">
+    <string>Realce em Haar </string>
+   </property>
+   <property name="toolTip">
+    <string>Realça imagem de Haar</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
