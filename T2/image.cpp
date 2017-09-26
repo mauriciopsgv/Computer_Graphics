@@ -257,6 +257,7 @@ void haar(Image& input, Image& output)
     std::vector<float> haarHorizontalBuffer(width * height * nColor, 0.0f);
     std::vector<float> outputBuffer(width * height * nColor, 0.0f);
 
+    // Aplicando o filtro na horizontal
     for (int row = 0; row < height; row++)
     {
         for (int column = 0; column < width; column+=2)
@@ -271,6 +272,7 @@ void haar(Image& input, Image& output)
         }
     }
 
+    // Aplicando o filtro na vertical
     for (int column = 0; column < width; column++)
     {
         for (int row = 0; row < height; row+=2)
@@ -284,17 +286,118 @@ void haar(Image& input, Image& output)
             }
         }
     }
-    output = *(new Image(width, height, nColor, &outputBuffer[0]));
+    output = Image(width, height, nColor, &outputBuffer[0]);
 }
 
 
 void haarInv(Image& input, Image& output)
 {
-    output = input.toGrayscale();
+    int width, height, nColor;
+    input.getDimensions(width, height, nColor);
+    std::vector<float> inputBuffer = input.getColorBuffer();
+    std::vector<float> inverseHaarVerticalBuffer(width * height * nColor, 0.0f);
+    std::vector<float> outputBuffer(width * height * nColor, 0.0f);
+
+    // Revertendo Haar vertical
+    for (int column = 0; column < width; column++)
+    {
+        for (int row = 0; row < height; row+=2)
+        {
+            for (int depth = 0; depth < nColor; depth++)
+            {
+                int indexMedia   = (row/2)*width*nColor + (column)*nColor + depth;
+                int indexDetalhe = (row/2)*width*nColor + (column)*nColor + (height/2)*width*nColor + depth;
+                inverseHaarVerticalBuffer[(row)*width*nColor   + (column)*nColor + depth] = inputBuffer[indexMedia] + inputBuffer[indexDetalhe];
+                inverseHaarVerticalBuffer[(row+1)*width*nColor + (column)*nColor + depth] = inputBuffer[indexMedia] - inputBuffer[indexDetalhe];
+            }
+        }
+    }
+
+    // Revertendo Haar horizontal
+    for (int row = 0; row < height; row++)
+    {
+        for (int column = 0; column < width; column+=2)
+        {
+            for (int depth = 0; depth < nColor; depth++)
+            {
+                int indexMedia   = row*width*nColor + (column/2)*nColor + depth;
+                int indexDetalhe = row*width*nColor + (column/2)*nColor + (width/2)*nColor + depth;
+                outputBuffer[(row)*width*nColor + (column)*nColor   + depth] = inverseHaarVerticalBuffer[indexMedia] + inverseHaarVerticalBuffer[indexDetalhe];
+                outputBuffer[(row)*width*nColor + (column+1)*nColor + depth] = inverseHaarVerticalBuffer[indexMedia] - inverseHaarVerticalBuffer[indexDetalhe];
+            }
+        }
+    }
+
+    output = Image(width, height, nColor, &outputBuffer[0]);
+
 }
 
+float gamaCorrection (std::vector<float>& imageBuffer, int gama, int row, int column, int width, int nColor)
+{
+    float luminance = pow(pow(imageBuffer[row*width*nColor + column*nColor],2) +
+                          pow(imageBuffer[row*width*nColor + column*nColor + 1],2) +
+                          pow(imageBuffer[row*width*nColor + column*nColor + 2],2), 0.5);
+    return pow(luminance, 1.0/gama);
+}
 
 void enhanceHaar(Image& input, Image& output)
 {
-    output = Image(input);
+    int gama = 2;
+    int width, height, nColor;
+    input.getDimensions(width, height, nColor);
+    std::vector<float> inputBuffer = input.getColorBuffer();
+    std::vector<float> outputBuffer = input.getColorBuffer();
+
+    /* Quadrants
+     *   1  2
+     *   4  3
+     */
+
+
+    // 2nd Quadrant
+    for (int row = 0; row < height/2; row++)
+    {
+        for (int column = width/2; column < width; column++)
+        {
+            float gamaCorrected = gamaCorrection(inputBuffer, gama, row, column, width, nColor);
+            for (int depth = 0; depth < nColor; depth++)
+            {
+                outputBuffer[row*width*nColor + column*nColor + depth] = gamaCorrected;
+            }
+        }
+    }
+
+    // 3rd Quadrant
+    for (int row = height/2; row < height; row++)
+    {
+        for (int column = width/2; column < width; column++)
+        {
+            float luminance = pow(pow(inputBuffer[row*width*nColor + column*nColor],2) +
+                                  pow(inputBuffer[row*width*nColor + column*nColor + 1],2) +
+                                  pow(inputBuffer[row*width*nColor + column*nColor + 2],2), 0.5);
+            float gamaCorrection = pow(luminance, 1.0/gama);
+
+            outputBuffer[row*width*nColor + column*nColor]     = gamaCorrection;
+            outputBuffer[row*width*nColor + column*nColor + 1] = gamaCorrection;
+            outputBuffer[row*width*nColor + column*nColor + 2] = gamaCorrection;
+        }
+    }
+
+    // 4th Quadrant
+    for (int row = height/2; row < height; row++)
+    {
+        for (int column = 0; column < width/2; column++)
+        {
+            float luminance = pow(pow(inputBuffer[row*width*nColor + column*nColor],2) +
+                                  pow(inputBuffer[row*width*nColor + column*nColor + 1],2) +
+                                  pow(inputBuffer[row*width*nColor + column*nColor + 2],2), 0.5);
+            float gamaCorrection = pow(luminance, 1.0/gama);
+
+            outputBuffer[row*width*nColor + column*nColor]     = gamaCorrection;
+            outputBuffer[row*width*nColor + column*nColor + 1] = gamaCorrection;
+            outputBuffer[row*width*nColor + column*nColor + 2] = gamaCorrection;
+        }
+    }
+
+    output = Image(width, height, nColor, &outputBuffer[0]);
 }
