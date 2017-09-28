@@ -147,19 +147,21 @@ QImage Image::toQImage()
 void smoothing(Image& input, Image& output)
 {
     int width, height, nColor;
+    int row, column, depth;
+    int a11,a12,a13,a21,a22,a23,a31,a32,a33;
     input.getDimensions(width, height, nColor);
     std::vector<float> inputBuffer = input.getColorBuffer();
     std::vector<float> outputBuffer(input.getColorBuffer());
 
-    for (int row = 1; row < height - 1; row++)
+    for (row = 1; row < height - 1; row++)
     {
-        for (int column = 1; column < width - 1; column++)
+        for (column = 1; column < width - 1; column++)
         {
-            for (int depth = 0; depth < nColor; depth++)
+            for (depth = 0; depth < nColor; depth++)
             {
-                int a11 = (row-1)*width*nColor + (column-1)*nColor + depth;     int a12 = (row-1)*width*nColor + (column)*nColor + depth;   int a13 = (row-1)*width*nColor + (column+1)*nColor + depth;
-                int a21 = (row)*width*nColor   + (column-1)*nColor + depth;     int a22 = (row)*width*nColor   + (column)*nColor + depth;   int a23 = (row)*width*nColor   + (column+1)*nColor + depth;
-                int a31 = (row+1)*width*nColor + (column-1)*nColor + depth;     int a32 = (row+1)*width*nColor + (column)*nColor + depth;   int a33 = (row+1)*width*nColor + (column+1)*nColor + depth;
+                a11 = (row-1)*width*nColor + (column-1)*nColor + depth;     a12 = (row-1)*width*nColor + (column)*nColor + depth;   a13 = (row-1)*width*nColor + (column+1)*nColor + depth;
+                a21 = (row)*width*nColor   + (column-1)*nColor + depth;     a22 = (row)*width*nColor   + (column)*nColor + depth;   a23 = (row)*width*nColor   + (column+1)*nColor + depth;
+                a31 = (row+1)*width*nColor + (column-1)*nColor + depth;     a32 = (row+1)*width*nColor + (column)*nColor + depth;   a33 = (row+1)*width*nColor + (column+1)*nColor + depth;
                 outputBuffer[row*width*nColor + column*nColor + depth] = 1/16.0 * (1*inputBuffer[a11] + 2*inputBuffer[a12] + 1*inputBuffer[a13] +
                                                                                    2*inputBuffer[a21] + 4*inputBuffer[a22] + 2*inputBuffer[a23] +
                                                                                    1*inputBuffer[a31] + 2*inputBuffer[a32] + 1*inputBuffer[a33]);
@@ -173,22 +175,25 @@ void smoothing(Image& input, Image& output)
 void sobel(Image& input, Image& output)
 {
     int width, height, nColor;
+    int row, column;
+    int a11,a12,a13,a21,a23,a31,a32,a33;
+    float deltaX, deltaY;
     Image grayInput = input.toGrayscale();
     grayInput.getDimensions(width, height, nColor);
     std::vector<float> grayInputBuffer = grayInput.getColorBuffer();
     std::vector<float> outputBuffer(width * height * nColor, 0.0f);
 
-    for (int row = 1; row < height - 1; row++)
+    for (row = 1; row < height - 1; row++)
     {
-        for (int column = 1; column < width - 1; column++)
+        for (column = 1; column < width - 1; column++)
         {
-            int a11 = (row-1)*width + (column-1) ;  int a12 = (row-1)*width + (column);  int a13 = (row-1)*width + (column+1);
-            int a21 = (row)*width   + (column-1) ;                                       int a23 = (row)*width   + (column+1);
-            int a31 = (row+1)*width + (column-1) ;  int a32 = (row+1)*width + (column);  int a33 = (row+1)*width + (column+1);
-            float deltaX = (1*grayInputBuffer[a11] - 1*grayInputBuffer[a13] +
+            a11 = (row-1)*width + (column-1) ;  a12 = (row-1)*width + (column);  a13 = (row-1)*width + (column+1);
+            a21 = (row)*width   + (column-1) ;                                   a23 = (row)*width   + (column+1);
+            a31 = (row+1)*width + (column-1) ;  a32 = (row+1)*width + (column);  a33 = (row+1)*width + (column+1);
+            deltaX = (1*grayInputBuffer[a11] - 1*grayInputBuffer[a13] +
                             2*grayInputBuffer[a21] - 2*grayInputBuffer[a23] +
                             1*grayInputBuffer[a31] - 1*grayInputBuffer[a33]);
-            float deltaY = (1*grayInputBuffer[a11] + 2*grayInputBuffer[a12] + 1*grayInputBuffer[a13] -
+            deltaY = (1*grayInputBuffer[a11] + 2*grayInputBuffer[a12] + 1*grayInputBuffer[a13] -
                             1*grayInputBuffer[a31] - 2*grayInputBuffer[a32] - 1*grayInputBuffer[a33]);
             outputBuffer[row*width + column] = sqrtf(deltaX*deltaX + deltaY*deltaY);
         }
@@ -199,23 +204,26 @@ void sobel(Image& input, Image& output)
 void sobelInColors(Image& input, Image& output)
 {
     int width, height, nColor;
+    int row, column, depth;
+    int a11,a12,a13,a21,a23,a31,a32,a33;
+    float deltaX, deltaY;
     input.getDimensions(width, height, nColor);
     std::vector<float> inputBuffer = input.getColorBuffer();
     std::vector<float> outputBuffer(width * height * nColor, 0.0f);
 
-    for (int row = 1; row < height - 1; row++)
+    for (row = 1; row < height - 1; row++)
     {
-        for (int column = 1; column < width - 1; column++)
+        for (column = 1; column < width - 1; column++)
         {
-            for (int depth = 0; depth < nColor; depth++)
+            for (depth = 0; depth < nColor; depth++)
             {
-                int a11 = (row-1)*width*nColor + (column-1)*nColor + depth;     int a12 = (row-1)*width*nColor + (column)*nColor + depth;   int a13 = (row-1)*width*nColor + (column+1)*nColor + depth;
-                int a21 = (row)*width*nColor   + (column-1)*nColor + depth;                                                                 int a23 = (row)*width*nColor   + (column+1)*nColor + depth;
-                int a31 = (row+1)*width*nColor + (column-1)*nColor + depth;     int a32 = (row+1)*width*nColor + (column)*nColor + depth;   int a33 = (row+1)*width*nColor + (column+1)*nColor + depth;
-                float deltaX = (1*inputBuffer[a11] - 1*inputBuffer[a13] +
+                a11 = (row-1)*width*nColor + (column-1)*nColor + depth;     a12 = (row-1)*width*nColor + (column)*nColor + depth;   a13 = (row-1)*width*nColor + (column+1)*nColor + depth;
+                a21 = (row)*width*nColor   + (column-1)*nColor + depth;                                                             a23 = (row)*width*nColor   + (column+1)*nColor + depth;
+                a31 = (row+1)*width*nColor + (column-1)*nColor + depth;     a32 = (row+1)*width*nColor + (column)*nColor + depth;   a33 = (row+1)*width*nColor + (column+1)*nColor + depth;
+                deltaX = (1*inputBuffer[a11] - 1*inputBuffer[a13] +
                                 2*inputBuffer[a21] - 2*inputBuffer[a23] +
                                 1*inputBuffer[a31] - 1*inputBuffer[a33]);
-                float deltaY = (1*inputBuffer[a11] + 2*inputBuffer[a12] + 1*inputBuffer[a13] -
+                deltaY = (1*inputBuffer[a11] + 2*inputBuffer[a12] + 1*inputBuffer[a13] -
                                 1*inputBuffer[a31] - 2*inputBuffer[a32] - 1*inputBuffer[a33]);
                 outputBuffer[row*width*nColor + column*nColor + depth] = sqrtf(deltaX*deltaX + deltaY*deltaY);
             }
@@ -224,48 +232,25 @@ void sobelInColors(Image& input, Image& output)
     output = *(new Image(width, height, nColor, &outputBuffer[0]));
 }
 
-
-void duplicateHorizontal(Image& input, Image& output)
-{
-    int width, height, nColor;
-    input.getDimensions(width, height, nColor);
-    std::vector<float> inputBuffer = input.getColorBuffer();
-    std::vector<float> outputBuffer(width * height * nColor, 0.0f);
-
-    for (int row = 0; row < height; row++)
-    {
-        for (int column = 0; column < width; column+=2)
-        {
-            for (int depth = 0; depth < nColor; depth++)
-            {
-                int a1 = (row)*width*nColor   + (column)*nColor + depth;
-                int a2 = (row)*width*nColor   + (column+1)*nColor + depth;
-                outputBuffer[row*width*nColor + (column/2)*nColor + depth] = (inputBuffer[a1] + inputBuffer[a2])/2.0;
-                outputBuffer[row*width*nColor + (column/2)*nColor + (width/2)*nColor + depth] = (inputBuffer[a1] + inputBuffer[a2])/2.0;
-            }
-        }
-    }
-    output = *(new Image(width, height, nColor, &outputBuffer[0]));
-}
-
-
 void haar(Image& input, Image& output)
 {
     int width, height, nColor;
+    int row, column, depth;
+    int a1, a2;
     input.getDimensions(width, height, nColor);
     std::vector<float> inputBuffer = input.getColorBuffer();
     std::vector<float> haarHorizontalBuffer(width * height * nColor, 0.0f);
     std::vector<float> outputBuffer(width * height * nColor, 0.0f);
 
     // Aplicando o filtro na horizontal
-    for (int row = 0; row < height; row++)
+    for (row = 0; row < height; row++)
     {
-        for (int column = 0; column < width; column+=2)
+        for (column = 0; column < width; column+=2)
         {
-            for (int depth = 0; depth < nColor; depth++)
+            for (depth = 0; depth < nColor; depth++)
             {
-                int a1 = (row)*width*nColor   + (column)*nColor + depth;
-                int a2 = (row)*width*nColor   + (column+1)*nColor + depth;
+                a1 = (row)*width*nColor   + (column)*nColor + depth;
+                a2 = (row)*width*nColor   + (column+1)*nColor + depth;
                 haarHorizontalBuffer[row*width*nColor + (column/2)*nColor + depth] = (inputBuffer[a1] + inputBuffer[a2])/2.0;
                 haarHorizontalBuffer[row*width*nColor + (column/2)*nColor + (width/2)*nColor + depth] = (inputBuffer[a1] - inputBuffer[a2])/2.0;
             }
@@ -273,14 +258,14 @@ void haar(Image& input, Image& output)
     }
 
     // Aplicando o filtro na vertical
-    for (int column = 0; column < width; column++)
+    for (column = 0; column < width; column++)
     {
-        for (int row = 0; row < height; row+=2)
+        for (row = 0; row < height; row+=2)
         {
-            for (int depth = 0; depth < nColor; depth++)
+            for (depth = 0; depth < nColor; depth++)
             {
-                int a1 = (row)*width*nColor   + (column)*nColor + depth;
-                int a2 = (row+1)*width*nColor   + (column)*nColor + depth;
+                a1 = (row)*width*nColor   + (column)*nColor + depth;
+                a2 = (row+1)*width*nColor   + (column)*nColor + depth;
                 outputBuffer[(row/2)*width*nColor + (column)*nColor + depth] = (haarHorizontalBuffer[a1] + haarHorizontalBuffer[a2])/2.0;
                 outputBuffer[(row/2)*width*nColor + (column)*nColor + (height/2)*width*nColor + depth] = (haarHorizontalBuffer[a1] - haarHorizontalBuffer[a2])/2.0;
             }
@@ -293,20 +278,22 @@ void haar(Image& input, Image& output)
 void haarInv(Image& input, Image& output)
 {
     int width, height, nColor;
+    int row, column, depth;
+    int indexMedia, indexDetalhe;
     input.getDimensions(width, height, nColor);
     std::vector<float> inputBuffer = input.getColorBuffer();
     std::vector<float> inverseHaarVerticalBuffer(width * height * nColor, 0.0f);
     std::vector<float> outputBuffer(width * height * nColor, 0.0f);
 
     // Revertendo Haar vertical
-    for (int column = 0; column < width; column++)
+    for (column = 0; column < width; column++)
     {
-        for (int row = 0; row < height; row+=2)
+        for (row = 0; row < height; row+=2)
         {
-            for (int depth = 0; depth < nColor; depth++)
+            for (depth = 0; depth < nColor; depth++)
             {
-                int indexMedia   = (row/2)*width*nColor + (column)*nColor + depth;
-                int indexDetalhe = (row/2)*width*nColor + (column)*nColor + (height/2)*width*nColor + depth;
+                indexMedia   = (row/2)*width*nColor + (column)*nColor + depth;
+                indexDetalhe = (row/2)*width*nColor + (column)*nColor + (height/2)*width*nColor + depth;
                 inverseHaarVerticalBuffer[(row)*width*nColor   + (column)*nColor + depth] = inputBuffer[indexMedia] + inputBuffer[indexDetalhe];
                 inverseHaarVerticalBuffer[(row+1)*width*nColor + (column)*nColor + depth] = inputBuffer[indexMedia] - inputBuffer[indexDetalhe];
             }
@@ -314,14 +301,14 @@ void haarInv(Image& input, Image& output)
     }
 
     // Revertendo Haar horizontal
-    for (int row = 0; row < height; row++)
+    for (row = 0; row < height; row++)
     {
-        for (int column = 0; column < width; column+=2)
+        for (column = 0; column < width; column+=2)
         {
-            for (int depth = 0; depth < nColor; depth++)
+            for (depth = 0; depth < nColor; depth++)
             {
-                int indexMedia   = row*width*nColor + (column/2)*nColor + depth;
-                int indexDetalhe = row*width*nColor + (column/2)*nColor + (width/2)*nColor + depth;
+                indexMedia   = row*width*nColor + (column/2)*nColor + depth;
+                indexDetalhe = row*width*nColor + (column/2)*nColor + (width/2)*nColor + depth;
                 outputBuffer[(row)*width*nColor + (column)*nColor   + depth] = inverseHaarVerticalBuffer[indexMedia] + inverseHaarVerticalBuffer[indexDetalhe];
                 outputBuffer[(row)*width*nColor + (column+1)*nColor + depth] = inverseHaarVerticalBuffer[indexMedia] - inverseHaarVerticalBuffer[indexDetalhe];
             }
@@ -344,6 +331,8 @@ void enhanceHaar(Image& input, Image& output)
 {
     int gama = 2;
     int width, height, nColor;
+    int row, column, depth;
+    float gamaCorrected;
     input.getDimensions(width, height, nColor);
     std::vector<float> inputBuffer = input.getColorBuffer();
     std::vector<float> outputBuffer = input.getColorBuffer();
@@ -355,12 +344,12 @@ void enhanceHaar(Image& input, Image& output)
 
 
     // 2nd Quadrant
-    for (int row = 0; row < height/2; row++)
+    for (row = 0; row < height/2; row++)
     {
-        for (int column = width/2; column < width; column++)
+        for (column = width/2; column < width; column++)
         {
-            float gamaCorrected = gamaCorrection(inputBuffer, gama, row, column, width, nColor);
-            for (int depth = 0; depth < nColor; depth++)
+            gamaCorrected = gamaCorrection(inputBuffer, gama, row, column, width, nColor);
+            for (depth = 0; depth < nColor; depth++)
             {
                 outputBuffer[row*width*nColor + column*nColor + depth] = gamaCorrected;
             }
@@ -368,34 +357,28 @@ void enhanceHaar(Image& input, Image& output)
     }
 
     // 3rd Quadrant
-    for (int row = height/2; row < height; row++)
+    for (row = height/2; row < height; row++)
     {
-        for (int column = width/2; column < width; column++)
+        for (column = width/2; column < width; column++)
         {
-            float luminance = pow(pow(inputBuffer[row*width*nColor + column*nColor],2) +
-                                  pow(inputBuffer[row*width*nColor + column*nColor + 1],2) +
-                                  pow(inputBuffer[row*width*nColor + column*nColor + 2],2), 0.5);
-            float gamaCorrection = pow(luminance, 1.0/gama);
-
-            outputBuffer[row*width*nColor + column*nColor]     = gamaCorrection;
-            outputBuffer[row*width*nColor + column*nColor + 1] = gamaCorrection;
-            outputBuffer[row*width*nColor + column*nColor + 2] = gamaCorrection;
+            gamaCorrected = gamaCorrection(inputBuffer, gama, row, column, width, nColor);
+            for (depth = 0; depth < nColor; depth++)
+            {
+                outputBuffer[row*width*nColor + column*nColor + depth] = gamaCorrected;
+            }
         }
     }
 
     // 4th Quadrant
-    for (int row = height/2; row < height; row++)
+    for (row = height/2; row < height; row++)
     {
-        for (int column = 0; column < width/2; column++)
+        for (column = 0; column < width/2; column++)
         {
-            float luminance = pow(pow(inputBuffer[row*width*nColor + column*nColor],2) +
-                                  pow(inputBuffer[row*width*nColor + column*nColor + 1],2) +
-                                  pow(inputBuffer[row*width*nColor + column*nColor + 2],2), 0.5);
-            float gamaCorrection = pow(luminance, 1.0/gama);
-
-            outputBuffer[row*width*nColor + column*nColor]     = gamaCorrection;
-            outputBuffer[row*width*nColor + column*nColor + 1] = gamaCorrection;
-            outputBuffer[row*width*nColor + column*nColor + 2] = gamaCorrection;
+            gamaCorrected = gamaCorrection(inputBuffer, gama, row, column, width, nColor);
+            for (depth = 0; depth < nColor; depth++)
+            {
+                outputBuffer[row*width*nColor + column*nColor + depth] = gamaCorrected;
+            }
         }
     }
 
