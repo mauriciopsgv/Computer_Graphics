@@ -1,1 +1,10 @@
 *.user
+*.o
+T3/build-CG-T3-Desktop_Qt_5_9_1_MinGW_32bit-Debug/debug/moc_predefs.h
+*.Release
+T3/build-CG-T3-Desktop_Qt_5_9_1_MinGW_32bit-Debug/debug/qrc_data.cpp
+*.Debug
+T3/build-CG-T3-Desktop_Qt_5_9_1_MinGW_32bit-Debug/debug/moc_mainwindow.cpp
+*.exe
+T3/build-CG-T3-Desktop_Qt_5_9_1_MinGW_32bit-Debug/Makefile
+T3/build-CG-T3-Desktop_Qt_5_9_1_MinGW_32bit-Debug/ui_mainwindow.h
