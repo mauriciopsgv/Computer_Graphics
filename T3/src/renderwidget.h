@@ -39,6 +39,7 @@ private:
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
+    unsigned int textureID;
     std::vector< glm::vec3 > vertices;
     std::vector< glm::vec3 > normals;
     std::vector< glm::vec2 > texCoords;
@@ -52,13 +53,26 @@ private:
        float zNear,zFar;   /* distancia do plano proximo e distante        */
        float width,height; /* largura e altura da janela em pixels         */
     };
-
     Camera cam;
+
+
+//    struct ArcballSphere {
+//        glm::vec2 center;  /* centro da esfera, coordenadas da tela */
+//        float radius;  /* raio da esfera */
+//    };
+//    ArcballSphere sphere;
+    glm::vec2 center;  /* centro da esfera, coordenadas da tela */
+    float radius;  /* raio da esfera */
+
     glm::mat4x4 model;
     glm::mat4x4 view;
     glm::mat4x4 proj;
 
-    unsigned int textureID;
+    bool isRotating;
+    glm::vec3 lastSpherePoint;
+
+     glm::vec3 projectOnArballSphere(float x, float y);
+
 };
 
 #endif // RENDERWIDGET_H

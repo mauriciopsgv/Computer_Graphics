@@ -25,6 +25,14 @@ RenderWidget::RenderWidget(QWidget *parent)
     cam.fovy  = 60.f;
     cam.width = width();
     cam.height = height();
+
+//    sphere.center = glm::vec2(width()/2 , height()/2);
+//    sphere.radius = glm::min(width()/2 - 1, height()/2 - 1);
+    center = glm::vec2(width()/2 , height()/2);
+    radius = glm::min(width()/2 - 1, height()/2 - 1);
+
+
+    isRotating = false;
 }
 
 
@@ -86,7 +94,7 @@ void RenderWidget::paintGL()
 
     //Passar as uniformes da luz e do material
     program->setUniformValue("light.position", v*QVector3D(5,9,-5) );
-    program->setUniformValue("material.ambient", QVector3D(0.1f,0.1f,0.1f));
+    program->setUniformValue("material.ambient", QVector3D(0.5f,0.5f,0.5f));
     program->setUniformValue("material.diffuse", QVector3D(1.0f,1.0f,1.0f));
     program->setUniformValue("material.specular", QVector3D(1.0f,1.0f,1.0f));
     program->setUniformValue("material.shininess", 24.0f);
@@ -125,24 +133,63 @@ void RenderWidget::resizeGL(int w, int h)
     //Atualizar a câmera
     cam.width = w;
     cam.height = h;
+    center = glm::vec2(w/2 , h/2);
+    radius = glm::min(w/2 - 1, h/2 - 1);
 }
+
+glm::vec3 RenderWidget::projectOnArballSphere(float x, float y)
+{
+    glm::vec3 spherePoint;
+    spherePoint.x = (x - center.x)/radius;
+    spherePoint.y = (y - center.y)/radius;
+    spherePoint.z = pow(spherePoint.x,2) + pow(spherePoint.y,2) > 1 ? 0 : sqrt(1 - (pow(spherePoint.x,2) + pow(spherePoint.y,2)));
+    return glm::normalize(spherePoint);
+}
+
 
 
 void RenderWidget::mousePressEvent(QMouseEvent *event)
 {
-    QVector3D point( event->x(), height()-event->y(), 0 );
-    point = point.unproject( view, proj, QRect(0,0,width(),height()));
-    point.setZ(0.f);
+    if (event->button() == Qt::LeftButton)
+    {
+        // Origem das coordenadas de tela é o canto inferior esquerdo
+        QVector3D point( event->x(), height()-event->y(), 0 );
+        lastSpherePoint = projectOnArballSphere(point.x(), point.y());
+        isRotating = true;
+    }
 }
 
 
 void RenderWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::LeftButton)
+        isRotating = false;
 }
 
 
 void RenderWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    if (isRotating)
+    {
+        QVector3D point( event->x(), height()-event->y(), 0 );
+        glm::vec3 currentSpherePoint = projectOnArballSphere(point.x(), point.y());
+
+        // Algebricamente
+//        float halfAngle = glm::acos(glm::min(1.f, glm::normalizeDot(lastSpherePoint, currentSpherePoint)));
+//        glm::vec3 rotationAxis = glm::cross(lastSpherePoint, currentSpherePoint);
+//        glm::quat rotationQuaternium = glm::quat(cos(halfAngle), sin(halfAngle)*rotationAxis);
+//        glm::mat4 rotationMatrix = glm::mat4_cast(rotationQuaternium);
+
+        // Through Quaternium
+        glm::quat lastQuaternium = glm::quat(0, lastSpherePoint);
+        glm::quat currentQuaternium = glm::quat(0, currentSpherePoint);
+        glm::quat rotationQuaternium = currentQuaternium*glm::conjugate(lastQuaternium);
+        glm::mat4 rotationMatrix = glm::mat4_cast(rotationQuaternium);
+        model = rotationMatrix*model;
+        update();
+
+        lastSpherePoint = currentSpherePoint;
+    }
 }
 
 
