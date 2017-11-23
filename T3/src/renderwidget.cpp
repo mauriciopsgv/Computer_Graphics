@@ -29,7 +29,7 @@ RenderWidget::RenderWidget(QWidget *parent)
 //    sphere.center = glm::vec2(width()/2 , height()/2);
 //    sphere.radius = glm::min(width()/2 - 1, height()/2 - 1);
     center = glm::vec2(width()/2 , height()/2);
-    radius = glm::min(width()/2 - 1, height()/2 - 1);
+    radius = sqrt( pow(width(), 2) + pow(height(),2) );
 
 
     isRotating = false;
@@ -134,7 +134,7 @@ void RenderWidget::resizeGL(int w, int h)
     cam.width = w;
     cam.height = h;
     center = glm::vec2(w/2 , h/2);
-    radius = glm::min(w/2 - 1, h/2 - 1);
+    radius = sqrt( pow(w/2, 2) + pow(h/2,2) );
 }
 
 glm::vec3 RenderWidget::projectOnArballSphere(float x, float y)
@@ -173,12 +173,6 @@ void RenderWidget::mouseMoveEvent(QMouseEvent *event)
     {
         QVector3D point( event->x(), height()-event->y(), 0 );
         glm::vec3 currentSpherePoint = projectOnArballSphere(point.x(), point.y());
-
-        // Algebricamente
-//        float halfAngle = glm::acos(glm::min(1.f, glm::normalizeDot(lastSpherePoint, currentSpherePoint)));
-//        glm::vec3 rotationAxis = glm::cross(lastSpherePoint, currentSpherePoint);
-//        glm::quat rotationQuaternium = glm::quat(cos(halfAngle), sin(halfAngle)*rotationAxis);
-//        glm::mat4 rotationMatrix = glm::mat4_cast(rotationQuaternium);
 
         // Through Quaternium
         glm::quat lastQuaternium = glm::quat(0, lastSpherePoint);
