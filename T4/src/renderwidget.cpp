@@ -4,6 +4,11 @@
 #include <QGLWidget>
 #include <QMouseEvent>
 #include <glm/ext.hpp>
+
+#ifndef GLM_HPP
+#define GLM_HPP
+#include "glm/glm.hpp"
+#endif
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <cmath>
@@ -41,6 +46,11 @@ RenderWidget::~RenderWidget()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+}
+
+void RenderWidget::generateRayTracingImage(bool checked)
+{
+    printf("Working bitcheeeees\n");
 }
 
 
@@ -102,24 +112,33 @@ void RenderWidget::paintGL()
     glBindTexture(GL_TEXTURE_2D, textureID);
     program->setUniformValue("sampler", 0);
 
+    QMatrix4x4 mv = v * m;
+    QMatrix4x4 mvp = p * mv;
+    program->setUniformValue("mv", mv);
+    program->setUniformValue("mv_ti", mv.inverted().transposed());
+    program->setUniformValue("mvp", mvp);
+
+    //Desenhar
+    glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
+
     //Passar as matrizes de transformação
-    for( int x = -3; x <= 3; x+=3 )
-    {
-        for( int z = -3; z <= 3; z+=3)
-        {
-            QMatrix4x4 mObj;
-            mObj.translate(x,0,z);
+//    for( int x = -3; x <= 3; x+=3 )
+//    {
+//        for( int z = -3; z <= 3; z+=3)
+//        {
+//            QMatrix4x4 mObj;
+//            mObj.translate(x,0,z);
 
-            QMatrix4x4 mv = v * (m * mObj);
-            QMatrix4x4 mvp = p * mv;
-            program->setUniformValue("mv", mv);
-            program->setUniformValue("mv_ti", mv.inverted().transposed());
-            program->setUniformValue("mvp", mvp);
+//            QMatrix4x4 mv = v * (m * mObj);
+//            QMatrix4x4 mvp = p * mv;
+//            program->setUniformValue("mv", mv);
+//            program->setUniformValue("mv_ti", mv.inverted().transposed());
+//            program->setUniformValue("mvp", mvp);
 
-            //Desenhar
-            glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
-        }
-    }
+//            //Desenhar
+//            glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
+//        }
+//    }
 }
 
 

@@ -25,16 +25,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 FORMS += \
     mainwindow.ui
 
-DISTFILES +=
+DISTFILES += \
+    fragmentshader.glsl \
+    vertexshader.glsl
 
 HEADERS += \
     renderwidget.h \
-    mainwindow.h
+    mainwindow.h \
+    raytracingengine.h \
+    sphere.h \
+    ray.h \
+    triangle.h \
+    camera.h
 
 SOURCES += \
     renderwidget.cpp \
     mainwindow.cpp \
-    main.cpp
+    main.cpp \
+    raytracingengine.cpp \
+    sphere.cpp \
+    ray.cpp \
+    triangle.cpp
 
 RESOURCES += \
     data.qrc

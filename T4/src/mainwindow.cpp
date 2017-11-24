@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    connect(ui->actionGenerate_Ray_Tracing_Image, SIGNAL(triggered(bool)),
+            ui->renderWidget, SLOT(generateRayTracingImage(bool)));
 }
 
 MainWindow::~MainWindow()
