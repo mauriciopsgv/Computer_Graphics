@@ -5,17 +5,17 @@ RayTracingEngine::RayTracingEngine()
 
 }
 
-bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertexes)
+bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices)
 {
-    for (unsigned int i = 0; i < vertexes.size(); i+=3)
+    for (unsigned int i = 0; i < vertices.size(); i+=3)
     {
-        _triangles.push_back(Triangle(vertexes[i], vertexes[i+1], vertexes[i+2]));
+        _triangles.push_back(Triangle(vertices[i], vertices[i+1], vertices[i+2]));
     }
 }
 
 QImage RayTracingEngine::generateRayTracingImage()
 {
-    printf("Working YAY BITCHEEEEES");
+    printf("Working... I guess\n");
 }
 
 std::vector<float> RayTracingEngine::solveQuadraticEquation (float a, float b, float c)

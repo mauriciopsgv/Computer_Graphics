@@ -48,9 +48,17 @@ RenderWidget::~RenderWidget()
     glDeleteBuffers(1, &EBO);
 }
 
-void RenderWidget::generateRayTracingImage(bool checked)
+void RenderWidget::generateRayTracingImage()
 {
-    printf("Working bitcheeeees\n");
+    RayTracingEngine engine;
+    glm::mat4x4 mv = view * model;
+    std::vector<glm::vec3> verticesWorldCood;
+    for (unsigned int i = 0; i < vertices.size(); i++)
+    {
+        verticesWorldCood.push_back(glm::vec3(mv*glm::vec4(vertices[i],1.0f)));
+    }
+    engine.insertTriangles(verticesWorldCood);
+    engine.generateRayTracingImage();
 }
 
 

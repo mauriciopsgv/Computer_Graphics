@@ -15,7 +15,7 @@ class RayTracingEngine
 public:
     RayTracingEngine();
 
-    bool insertTriangles(std::vector<glm::vec3> vertex);
+    bool insertTriangles(std::vector<glm::vec3> vertices);
 
     QImage generateRayTracingImage();
 

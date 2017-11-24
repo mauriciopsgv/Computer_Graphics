@@ -15,6 +15,7 @@
 #endif
 
 #include "camera.h"
+#include "raytracingengine.h"
 
 class RenderWidget
         : public QOpenGLWidget
@@ -27,7 +28,7 @@ public:
     virtual ~RenderWidget();
 
 public slots:
-    void generateRayTracingImage(bool checked);
+    void generateRayTracingImage();
 
 private:
     virtual void initializeGL();
