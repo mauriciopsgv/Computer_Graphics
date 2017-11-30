@@ -19,6 +19,24 @@ Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
     _n = glm::normalize(glm::cross(_p2 - _p1, _p3 - _p2));
 }
 
+Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 t1, glm::vec3 t2, glm::vec3 t3)
+{
+    _p1 = p1;
+    _p2 = p2;
+    _p3 = p3;
+
+    _e12 = _p2 - _p1;
+    _e23 = _p3 - _p2;
+    _e31 = _p1 - _p3;
+    _e13 = - _e31;
+
+    _t1 = t1;
+    _t2 = t2;
+    _t3 = t3;
+
+    _n = glm::normalize(glm::cross(_p2 - _p1, _p3 - _p2));
+}
+
 Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 n)
 {
     _p1 = p1;
@@ -61,6 +79,21 @@ glm::vec3 Triangle::p2()
 glm::vec3 Triangle::p3()
 {
     return _p3;
+}
+
+glm::vec3 Triangle::t1()
+{
+    return _t1;
+}
+
+glm::vec3 Triangle::t2()
+{
+    return _t2;
+}
+
+glm::vec3 Triangle::t3()
+{
+    return _t3;
 }
 
 glm::vec3 Triangle::normal()

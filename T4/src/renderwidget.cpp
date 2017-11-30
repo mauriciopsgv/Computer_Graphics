@@ -61,7 +61,7 @@ QImage RenderWidget::generateRayTracingImage()
         verticesWorldCood.push_back(glm::vec3(model*glm::vec4(vertices[indices[i]],1.0f)));
     }
     engine.setCamera(cam);
-    engine.insertTriangles(verticesWorldCood);
+    engine.insertTriangles(verticesWorldCood, verticesWorldCood); // second parameter should be textureCoordinates
     return engine.generateRayTracingImage();
 }
 

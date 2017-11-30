@@ -7,7 +7,7 @@ RayTracingEngine::RayTracingEngine()
 
 }
 
-bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices)
+bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec3> textureCoordinates)
 {
     for (unsigned int i = 0; i < vertices.size(); i+=3)
     {
