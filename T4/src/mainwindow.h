@@ -17,6 +17,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+private slots:
+    void generateRayTracingImage();
 };
 
 #endif // MAINWINDOW_H

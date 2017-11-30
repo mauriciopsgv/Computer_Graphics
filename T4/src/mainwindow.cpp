@@ -7,10 +7,16 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->actionGenerate_Ray_Tracing_Image, SIGNAL(triggered()),
-            ui->renderWidget, SLOT(generateRayTracingImage()));
+            this, SLOT(generateRayTracingImage()));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::generateRayTracingImage()
+{
+    QImage rayTracingImage = ui->renderWidget->generateRayTracingImage();
+    ui->label->setPixmap(QPixmap::fromImage(rayTracingImage));
 }

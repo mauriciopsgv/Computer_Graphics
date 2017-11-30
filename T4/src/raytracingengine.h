@@ -17,6 +17,8 @@ public:
 
     bool insertTriangles(std::vector<glm::vec3> vertices);
 
+    bool setCamera(Camera camera);
+
     QImage generateRayTracingImage();
 
 private:
@@ -26,12 +28,13 @@ private:
     // Intersection functions return empty vector if there is no interception
     std::vector<glm::vec3> raySphereIntersection (Sphere s, Ray r);
 
-    std::vector<glm::vec3> rayTriangleIntersection (Triangle t, Ray r);
+    std::vector<glm::vec3> rayTriangleIntersectionPoint (Triangle t, Ray r);
+    float rayTriangleIntersectionT (Triangle t, Ray r);
 
     // Scene objects
     std::vector<Triangle> _triangles;
     std::vector<Sphere> _spheres;
-    Camera camera;
+    Camera _camera;
 
 };
 

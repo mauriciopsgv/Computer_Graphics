@@ -26,9 +26,7 @@ Q_OBJECT
 public:
     RenderWidget(QWidget* parent = 0);
     virtual ~RenderWidget();
-
-public slots:
-    void generateRayTracingImage();
+    QImage generateRayTracingImage();
 
 private:
     virtual void initializeGL();

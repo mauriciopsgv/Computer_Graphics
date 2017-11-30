@@ -4,6 +4,7 @@
 #include <QGLWidget>
 #include <QMouseEvent>
 #include <glm/ext.hpp>
+#include <QImage>
 
 #ifndef GLM_HPP
 #define GLM_HPP
@@ -12,6 +13,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <cmath>
+
+#include <iostream>
+
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif
@@ -23,7 +27,7 @@ RenderWidget::RenderWidget(QWidget *parent)
 {
     cam.at = glm::vec3(0.f,0.f,0.f);
     cam.eye = cam.at;
-    cam.eye.z = cam.at.z + 20.f;
+    cam.eye.z = cam.at.z + 3.f;
     cam.up = glm::vec3(0.f,1.f,0.f);
     cam.zNear = 0.1f;
     cam.zFar  = 100.f;
@@ -48,17 +52,17 @@ RenderWidget::~RenderWidget()
     glDeleteBuffers(1, &EBO);
 }
 
-void RenderWidget::generateRayTracingImage()
+QImage RenderWidget::generateRayTracingImage()
 {
     RayTracingEngine engine;
-    glm::mat4x4 mv = view * model;
     std::vector<glm::vec3> verticesWorldCood;
-    for (unsigned int i = 0; i < vertices.size(); i++)
+    for (unsigned int i = 0; i < indices.size(); i++)
     {
-        verticesWorldCood.push_back(glm::vec3(mv*glm::vec4(vertices[i],1.0f)));
+        verticesWorldCood.push_back(glm::vec3(model*glm::vec4(vertices[indices[i]],1.0f)));
     }
+    engine.setCamera(cam);
     engine.insertTriangles(verticesWorldCood);
-    engine.generateRayTracingImage();
+    return engine.generateRayTracingImage();
 }
 
 
