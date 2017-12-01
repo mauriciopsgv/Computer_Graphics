@@ -15,9 +15,11 @@ class RayTracingEngine
 public:
     RayTracingEngine();
 
-    bool insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec3> textureCoordinates);
-
     bool setCamera(Camera camera);
+
+    bool insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, std::string texturePath);
+
+    int insertTexture(std::string texturePath);
 
     QImage generateRayTracingImage();
 
@@ -34,7 +36,11 @@ private:
     // Scene objects
     std::vector<Triangle> _triangles;
     std::vector<Sphere> _spheres;
+    std::vector<std::pair<std::string, QImage>> _textures;
     Camera _camera;
+
+    // Texture Stuff
+    int LoadTexture(std::string texturePath);
 
 };
 

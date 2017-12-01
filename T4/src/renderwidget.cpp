@@ -56,12 +56,15 @@ QImage RenderWidget::generateRayTracingImage()
 {
     RayTracingEngine engine;
     std::vector<glm::vec3> verticesWorldCood;
+    std::vector<glm::vec2> textureCoordinates;
     for (unsigned int i = 0; i < indices.size(); i++)
     {
         verticesWorldCood.push_back(glm::vec3(model*glm::vec4(vertices[indices[i]],1.0f)));
+        textureCoordinates.push_back(texCoords[indices[i]]);
     }
     engine.setCamera(cam);
-    engine.insertTriangles(verticesWorldCood, verticesWorldCood); // second parameter should be textureCoordinates
+    engine.insertTexture(":/textures/cube_texture.png");
+    engine.insertTriangles(verticesWorldCood, textureCoordinates, ":/textures/cube_texture.png"); // second parameter should be textureCoordinates
     return engine.generateRayTracingImage();
 }
 

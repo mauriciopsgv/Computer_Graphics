@@ -7,19 +7,39 @@ RayTracingEngine::RayTracingEngine()
 
 }
 
-bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec3> textureCoordinates)
-{
-    for (unsigned int i = 0; i < vertices.size(); i+=3)
-    {
-        _triangles.push_back(Triangle(vertices[i], vertices[i+1], vertices[i+2]));
-    }
-    return true;
-}
-
 bool RayTracingEngine::setCamera(Camera camera)
 {
     _camera = camera;
     return true;
+}
+
+bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, std::string texturePath)
+{
+    int textureId = -1;
+    for (unsigned int i = 0; i < _textures.size(); i++)
+    {
+        if (_textures[i].first == texturePath)
+        {
+            textureId = i;
+            break;
+        }
+    }
+
+    for (unsigned int i = 0; i < vertices.size(); i+=3)
+    {
+        _triangles.push_back(Triangle(vertices[i], vertices[i+1], vertices[i+2], textureCoordinates[i], textureCoordinates[i+1], textureCoordinates[i+2], textureId));
+    }
+    return true;
+}
+
+int RayTracingEngine::insertTexture(std::string texturePath)
+{
+    QImage texImage = QImage(texturePath.c_str());
+    std::pair<std::string, QImage> newPair;
+    newPair.first = texturePath;
+    newPair.second = texImage;
+    _textures.push_back(newPair);
+    return _textures.size() - 1;
 }
 
 QImage RayTracingEngine::generateRayTracingImage()
@@ -44,9 +64,12 @@ QImage RayTracingEngine::generateRayTracingImage()
                 }
             }
             if (nearestIntersection < FLT_MAX)
-                outputImage.setPixelColor(x, outputImage.height() - y, QColor(255,0,0));
+            {
+                glm::vec2 texCoord = nearestTriangle.textureCoordinatesAnyPoint(currentRay.evaluateRay(nearestIntersection));
+                outputImage.setPixelColor(x, outputImage.height() - y - 1, _textures[nearestTriangle.textureId()].second.pixelColor(texCoord[0]*outputImage.width(), texCoord[1]*outputImage.height()));
+            }
             else
-                outputImage.setPixelColor(x, outputImage.height() - y, QColor(255,255,255));
+                outputImage.setPixelColor(x, outputImage.height() - y - 1, QColor(0,0,0));
         }
     }
     return outputImage;
