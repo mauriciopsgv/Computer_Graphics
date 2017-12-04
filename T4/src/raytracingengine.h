@@ -6,6 +6,7 @@
 #include <QImage>
 
 #include "camera.h"
+#include "material.h"
 #include "sphere.h"
 #include "ray.h"
 #include "triangle.h"
@@ -37,6 +38,7 @@ private:
     std::vector<Triangle> _triangles;
     std::vector<Sphere> _spheres;
     std::vector<std::pair<std::string, QImage>> _textures;
+    std::vector<Material> _materials;
     Camera _camera;
 
     // Texture Stuff

@@ -36,7 +36,8 @@ HEADERS += \
     sphere.h \
     ray.h \
     triangle.h \
-    camera.h
+    camera.h \
+    material.h
 
 SOURCES += \
     renderwidget.cpp \
