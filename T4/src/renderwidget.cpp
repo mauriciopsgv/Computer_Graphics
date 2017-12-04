@@ -63,8 +63,8 @@ QImage RenderWidget::generateRayTracingImage()
         textureCoordinates.push_back(texCoords[indices[i]]);
     }
     engine.setCamera(cam);
-    engine.insertTexture(":/textures/cube_texture.png");
-    engine.insertTriangles(verticesWorldCood, textureCoordinates, ":/textures/cube_texture.png"); // second parameter should be textureCoordinates
+    int textureId = engine.insertTexture(":/textures/cube_texture.png");
+    engine.insertTriangles(verticesWorldCood, textureCoordinates, textureId); // second parameter should be textureCoordinates
     return engine.generateRayTracingImage();
 }
 

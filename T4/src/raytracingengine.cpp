@@ -13,18 +13,8 @@ bool RayTracingEngine::setCamera(Camera camera)
     return true;
 }
 
-bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, std::string texturePath)
+bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, int textureId)
 {
-    int textureId = -1;
-    for (unsigned int i = 0; i < _textures.size(); i++)
-    {
-        if (_textures[i].first == texturePath)
-        {
-            textureId = i;
-            break;
-        }
-    }
-
     for (unsigned int i = 0; i < vertices.size(); i+=3)
     {
         _triangles.push_back(Triangle(vertices[i], vertices[i+1], vertices[i+2], textureCoordinates[i], textureCoordinates[i+1], textureCoordinates[i+2], textureId));
@@ -35,10 +25,7 @@ bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices, std::vec
 int RayTracingEngine::insertTexture(std::string texturePath)
 {
     QImage texImage = QImage(texturePath.c_str());
-    std::pair<std::string, QImage> newPair;
-    newPair.first = texturePath;
-    newPair.second = texImage;
-    _textures.push_back(newPair);
+    _textures.push_back(texImage);
     return _textures.size() - 1;
 }
 
@@ -46,7 +33,6 @@ QImage RayTracingEngine::generateRayTracingImage()
 {
     // TODO: lighting
     // TODO: texture color interpolation
-    // TODO: simplify texture storage
     QImage outputImage = QImage(_camera.width, _camera.height, QImage::Format_RGB32);
     float nearestIntersection, intersectionT;
     Triangle nearestTriangle = Triangle();
@@ -69,9 +55,9 @@ QImage RayTracingEngine::generateRayTracingImage()
             if (nearestIntersection > -1 && nearestIntersection < FLT_MAX)
             {
                 glm::vec2 texCoord = nearestTriangle.textureCoordinatesAnyPoint(currentRay.evaluateRay(nearestIntersection));
-                int w = texCoord[0]*_textures[nearestTriangle.textureId()].second.width();
-                int h = _textures[nearestTriangle.textureId()].second.height() - texCoord[1]*_textures[nearestTriangle.textureId()].second.height();
-                QColor pixColor = _textures[nearestTriangle.textureId()].second.pixelColor(w,h);
+                texCoord[0] = texCoord[0]*_textures[nearestTriangle.textureId()].width();
+                texCoord[1] = _textures[nearestTriangle.textureId()].height() - texCoord[1]*_textures[nearestTriangle.textureId()].height();
+                QColor pixColor = _textures[nearestTriangle.textureId()].pixelColor(texCoord[0], texCoord[1]);
                 outputImage.setPixelColor(x, outputImage.height() - y - 1, pixColor);
             }
             else

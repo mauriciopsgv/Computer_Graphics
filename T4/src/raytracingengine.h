@@ -18,7 +18,7 @@ public:
 
     bool setCamera(Camera camera);
 
-    bool insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, std::string texturePath);
+    bool insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, int textureId);
 
     int insertTexture(std::string texturePath);
 
@@ -37,7 +37,7 @@ private:
     // Scene objects
     std::vector<Triangle> _triangles;
     std::vector<Sphere> _spheres;
-    std::vector<std::pair<std::string, QImage>> _textures;
+    std::vector<QImage> _textures;
     std::vector<Material> _materials;
     Camera _camera;
 
