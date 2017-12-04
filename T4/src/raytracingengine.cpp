@@ -66,7 +66,10 @@ QImage RayTracingEngine::generateRayTracingImage()
             if (nearestIntersection < FLT_MAX)
             {
                 glm::vec2 texCoord = nearestTriangle.textureCoordinatesAnyPoint(currentRay.evaluateRay(nearestIntersection));
-                outputImage.setPixelColor(x, outputImage.height() - y - 1, _textures[nearestTriangle.textureId()].second.pixelColor(texCoord[0]*outputImage.width(), texCoord[1]*outputImage.height()));
+                int w = texCoord[0]*_textures[nearestTriangle.textureId()].second.width();
+                int h = _textures[nearestTriangle.textureId()].second.height() - texCoord[1]*_textures[nearestTriangle.textureId()].second.height();
+                QColor pixColor = _textures[nearestTriangle.textureId()].second.pixelColor(w,h);
+                outputImage.setPixelColor(x, outputImage.height() - y - 1, pixColor);
             }
             else
                 outputImage.setPixelColor(x, outputImage.height() - y - 1, QColor(0,0,0));
