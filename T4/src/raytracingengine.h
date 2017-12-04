@@ -18,9 +18,11 @@ public:
 
     bool setCamera(Camera camera);
 
-    bool insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, int textureId);
+    bool insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, int textureId, int materialId);
 
     int insertTexture(std::string texturePath);
+
+    int insertMaterial(Material material);
 
     QImage generateRayTracingImage();
 

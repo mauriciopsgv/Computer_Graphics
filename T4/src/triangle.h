@@ -11,7 +11,7 @@ class Triangle
 public:
     Triangle();
     Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3);
-    Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, int textureId);
+    Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, int textureId, int materialId);
     Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 n);
 
     bool isInsideTriangle(glm::vec3 point);
@@ -23,6 +23,7 @@ public:
     glm::vec2 t2();
     glm::vec2 t3();
     int textureId();
+    int materialId();
     glm::vec3 normal();
 
     glm::vec2 textureCoordinatesAnyPoint(glm::vec3 point);
@@ -53,6 +54,7 @@ private:
     glm::vec3 _n;
 
     int _textureId;
+    int _materialId;
 };
 
 #endif // TRIANGLE_H

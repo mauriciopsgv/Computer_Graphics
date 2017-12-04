@@ -19,7 +19,7 @@ Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
     _n = glm::normalize(glm::cross(_p2 - _p1, _p3 - _p2));
 }
 
-Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, int textureId)
+Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, int textureId, int materialId)
 {
     _p1 = p1;
     _p2 = p2;
@@ -123,5 +123,11 @@ int Triangle::textureId()
 {
     return _textureId;
 }
+
+int Triangle::materialId()
+{
+    return _materialId;
+}
+
 
 

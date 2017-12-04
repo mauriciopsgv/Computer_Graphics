@@ -13,11 +13,11 @@ bool RayTracingEngine::setCamera(Camera camera)
     return true;
 }
 
-bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, int textureId)
+bool RayTracingEngine::insertTriangles(std::vector<glm::vec3> vertices, std::vector<glm::vec2> textureCoordinates, int textureId, int materialId)
 {
     for (unsigned int i = 0; i < vertices.size(); i+=3)
     {
-        _triangles.push_back(Triangle(vertices[i], vertices[i+1], vertices[i+2], textureCoordinates[i], textureCoordinates[i+1], textureCoordinates[i+2], textureId));
+        _triangles.push_back(Triangle(vertices[i], vertices[i+1], vertices[i+2], textureCoordinates[i], textureCoordinates[i+1], textureCoordinates[i+2], textureId, materialId));
     }
     return true;
 }
@@ -27,6 +27,12 @@ int RayTracingEngine::insertTexture(std::string texturePath)
     QImage texImage = QImage(texturePath.c_str());
     _textures.push_back(texImage);
     return _textures.size() - 1;
+}
+
+int RayTracingEngine::insertMaterial(Material material)
+{
+    _materials.push_back(material);
+    return _materials.size() -1;
 }
 
 QImage RayTracingEngine::generateRayTracingImage()
