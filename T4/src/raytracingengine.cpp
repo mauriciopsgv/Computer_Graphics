@@ -44,6 +44,9 @@ int RayTracingEngine::insertTexture(std::string texturePath)
 
 QImage RayTracingEngine::generateRayTracingImage()
 {
+    // TODO: lighting
+    // TODO: texture color interpolation
+    // TODO: simplify texture storage
     QImage outputImage = QImage(_camera.width, _camera.height, QImage::Format_RGB32);
     float nearestIntersection, intersectionT;
     Triangle nearestTriangle = Triangle();
@@ -63,7 +66,7 @@ QImage RayTracingEngine::generateRayTracingImage()
                     nearestTriangle = _triangles[i];
                 }
             }
-            if (nearestIntersection < FLT_MAX)
+            if (nearestIntersection > -1 && nearestIntersection < FLT_MAX)
             {
                 glm::vec2 texCoord = nearestTriangle.textureCoordinatesAnyPoint(currentRay.evaluateRay(nearestIntersection));
                 int w = texCoord[0]*_textures[nearestTriangle.textureId()].second.width();
