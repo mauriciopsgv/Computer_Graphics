@@ -51,6 +51,8 @@ SOURCES += \
 RESOURCES += \
     data.qrc
 
+QMAKE_CXXFLAGS += -fopenmp
+LIBS += -fopenmp
 
 
 

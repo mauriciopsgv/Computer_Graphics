@@ -40,13 +40,14 @@ QImage RayTracingEngine::generateRayTracingImage()
     // TODO: lighting
     // TODO: texture color interpolation
     QImage outputImage = QImage(_camera.width, _camera.height, QImage::Format_RGB32);
-    float nearestIntersection, intersectionT;
-    Triangle nearestTriangle = Triangle();
-    Ray currentRay = Ray(_camera.fovy, _camera.width, _camera.height, _camera.zNear, _camera.eye, _camera.at, _camera.up, 0, 0);
+    #pragma omp parallel for
     for (int y = 0; y < outputImage.height(); y++)
     {
         for (int x = 0; x < outputImage.width(); x++)
         {
+            float nearestIntersection, intersectionT;
+            Triangle nearestTriangle = Triangle();
+            Ray currentRay = Ray(_camera.fovy, _camera.width, _camera.height, _camera.zNear, _camera.eye, _camera.at, _camera.up, 0,0);
             nearestIntersection = FLT_MAX;
             currentRay.changeDirection(x,y);
             for (unsigned int i = 0; i < _triangles.size(); i++)
