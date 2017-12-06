@@ -37,6 +37,8 @@ Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 t1, glm::
     _n = glm::normalize(glm::cross(_p2 - _p1, _p3 - _p2));
 
     _textureId = textureId;
+
+    _materialId = materialId;
 }
 
 Triangle::Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 n)

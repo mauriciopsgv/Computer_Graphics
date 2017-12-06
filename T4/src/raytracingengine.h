@@ -22,6 +22,8 @@ public:
 
     int insertTexture(std::string texturePath);
 
+    int insertLight(glm::vec3 lightPosition);
+
     int insertMaterial(Material material);
 
     QImage generateRayTracingImage();
@@ -42,6 +44,7 @@ private:
     std::vector<QImage> _textures;
     std::vector<Material> _materials;
     Camera _camera;
+    std::vector<glm::vec3> _lights;
 
     // Texture Stuff
     int LoadTexture(std::string texturePath);

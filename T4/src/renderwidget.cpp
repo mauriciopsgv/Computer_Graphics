@@ -57,10 +57,21 @@ QImage RenderWidget::generateRayTracingImage()
     RayTracingEngine engine;
     std::vector<glm::vec3> verticesWorldCood;
     std::vector<glm::vec2> textureCoordinates;
-    for (unsigned int i = 0; i < indices.size(); i++)
+
+    for( int x = -3; x <= 3; x+=3 )
     {
-        verticesWorldCood.push_back(glm::vec3(model*glm::vec4(vertices[indices[i]],1.0f)));
-        textureCoordinates.push_back(texCoords[indices[i]]);
+        for( int z = -3; z <= 3; z+=3)
+        {
+            glm::mat4x4 mObj;
+            mObj = glm::translate(mObj, glm::vec3(x,0,z));
+            glm::mat4x4 m = model*mObj;
+
+            for (unsigned int i = 0; i < indices.size(); i++)
+            {
+                verticesWorldCood.push_back(glm::vec3(m*glm::vec4(vertices[indices[i]],1.0f)));
+                textureCoordinates.push_back(texCoords[indices[i]]);
+            }
+        }
     }
     engine.setCamera(cam);
     int textureId = engine.insertTexture(":/textures/cube_texture.png");
@@ -70,6 +81,7 @@ QImage RenderWidget::generateRayTracingImage()
     material.specular = glm::vec3(1.0f, 1.0f, 1.0f);
     material.shininess = 24.f;
     int materialId = engine.insertMaterial(material);
+    engine.insertLight(glm::vec3(5,9,-5));
     engine.insertTriangles(verticesWorldCood, textureCoordinates, textureId, materialId); // second parameter should be textureCoordinates
     return engine.generateRayTracingImage();
 }
@@ -143,23 +155,23 @@ void RenderWidget::paintGL()
     glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
 
     //Passar as matrizes de transformação
-//    for( int x = -3; x <= 3; x+=3 )
-//    {
-//        for( int z = -3; z <= 3; z+=3)
-//        {
-//            QMatrix4x4 mObj;
-//            mObj.translate(x,0,z);
+    for( int x = -3; x <= 3; x+=3 )
+    {
+        for( int z = -3; z <= 3; z+=3)
+        {
+            QMatrix4x4 mObj;
+            mObj.translate(x,0,z);
 
-//            QMatrix4x4 mv = v * (m * mObj);
-//            QMatrix4x4 mvp = p * mv;
-//            program->setUniformValue("mv", mv);
-//            program->setUniformValue("mv_ti", mv.inverted().transposed());
-//            program->setUniformValue("mvp", mvp);
+            QMatrix4x4 mv = v * (m * mObj);
+            QMatrix4x4 mvp = p * mv;
+            program->setUniformValue("mv", mv);
+            program->setUniformValue("mv_ti", mv.inverted().transposed());
+            program->setUniformValue("mvp", mvp);
 
-//            //Desenhar
-//            glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
-//        }
-//    }
+            //Desenhar
+            glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
+        }
+    }
 }
 
 
